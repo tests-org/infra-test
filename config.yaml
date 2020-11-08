@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "19"
+    meta.helm.sh/release-name: test-chart
+    meta.helm.sh/release-namespace: api
+  creationTimestamp: "2020-09-06T13:03:02Z"
+  generation: 21
+  labels:
+    app.kubernetes.io/instance: test-chart
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: test-service
+    app.kubernetes.io/version: 1.16.0
+    helm.sh/chart: generic-test-service-helm-chart-0.1.0
+  name: test-service
+  namespace: api
+  resourceVersion: "15791320"
+  selfLink: /apis/apps//test-service
+  uid: 8e132dd7
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: test-chart
+      app.kubernetes.io/name: test-service
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        config.hash: 4aeb1beeff1bca
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: test-chart
+        app.kubernetes.io/name: test-service
+    spec:
+      containers:
+        - env:
+            - name: ENVIRONMENT
+              value: com
+            - name: NEW_RELIC_APP_NAME
+              value: test-service-us
+            - name: NEW_RELIC_LABELS
+              value: Environment:prod;ServiceName:test-service;Domain:api.test.com
+            - name: NEW_RELIC_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: license_key
+                  name: newrelic
+          image: testhq/test_service@sha256:13bb649fa4b28113
+          imagePullPolicy: IfNotPresent
+          name: test-service
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /config.json
+              name: config-volume
+              readOnly: true
+              subPath: config
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+        - name: prod-image-pull-secret
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: test-service
+          name: config-volume
+status:
+  availableReplicas: 1
+  conditions:
+    - lastTransitionTime: "2020-10-11T08:19:48Z"
+      lastUpdateTime: "2020-10-11T08:19:48Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    - lastTransitionTime: "2020-10-09T16:45:40Z"
+      lastUpdateTime: "2020-10-27T08:59:11Z"
+      message: ReplicaSet "test-service-5cdf9" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+  observedGeneration: 21
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1
